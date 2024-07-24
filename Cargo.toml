@@ -1,0 +1,8 @@
+[package]
+name = "wavify"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+aus = "0.1.5"
+glob = "0.3.1"
