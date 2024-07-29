@@ -1,3 +1,4 @@
+use aus::AudioError;
 use glob::glob;
 use threadpool::ThreadPool;
 
@@ -61,14 +62,37 @@ fn process(files: &Vec<(String, String, String)>, max_num_threads: usize) {
         let dir = file_tup.1.clone();
         let name = file_tup.2.clone();
         pool.execute(move || {
+            println!("File: {}", file);
             match aus::read(&file) {
-                Ok(audio) => {
-                    match aus::write(&format!("{}/{}.wav", dir, name), &audio) {
+                Ok(mut audio) => {
+                    if audio.bits_per_sample == 0 {
+                        audio.bits_per_sample = 16;
+                        audio.audio_format = aus::AudioFormat::S16;
+                    }
+                    if audio.sample_rate == 0 {
+                        audio.sample_rate = 44100;
+                    }
+                    let new_file_name = format!("{}/{}.wav", dir, name);
+                    match aus::write(&new_file_name, &audio) {
                         Ok(_) => (),
-                        Err(_) => ()
+                        Err(err) => match err {
+                            AudioError::FileCorrupt => println!("Error writing file {}: The file was corrupt.", new_file_name),
+                            AudioError::FileInaccessible(msg) => println!("Error writing file {}: The file was inaccessible ({}).", new_file_name, msg),
+                            AudioError::NumChannels(msg) => println!("Error writing file {}: The number of channels was wrong ({}).", new_file_name, msg),
+                            AudioError::NumFrames(msg) => println!("Error writing file {}: The number of frames was wrong ({}).", new_file_name, msg),
+                            AudioError::SampleValueOutOfRange(msg) => println!("Error writing file {}: A sampel value was out of range ({}).", new_file_name, msg),
+                            AudioError::WrongFormat(msg) => println!("Error writing file {}: The format was wrong ({}).", new_file_name, msg)
+                        }
                     };
                 },
-                Err(_) => ()
+                Err(err) => match err {
+                    AudioError::FileCorrupt => println!("Error writing file {}: The file was corrupt.", file),
+                    AudioError::FileInaccessible(msg) => println!("Error writing file {}: The file was inaccessible ({}).", file, msg),
+                    AudioError::NumChannels(msg) => println!("Error writing file {}: The number of channels was wrong ({}).", file, msg),
+                    AudioError::NumFrames(msg) => println!("Error writing file {}: The number of frames was wrong ({}).", file, msg),
+                    AudioError::SampleValueOutOfRange(msg) => println!("Error writing file {}: A sampel value was out of range ({}).", file, msg),
+                    AudioError::WrongFormat(msg) => println!("Error writing file {}: The format was wrong ({}).", file, msg)
+                }
             }
         });
     }
