@@ -4,7 +4,7 @@ Automatically converts non-WAV audio in a directory and its subdirectories to WA
 ## Optional command-line parameters:
 `-f`, `--folder`: The directory to convert. Defaults to `"."`
 
-`-n`, `--num-threads`: The maximum number of threads to run. If `0` (default), the program uses the same number of threads as there are processors available.
+`-t`, `--num-threads`: The maximum number of threads to run. If `0` (default), the program uses the same number of threads as there are processors available.
 
 ## Optional command-line flag
 `-d`, `--delete`: If you provide this flag, the original files will be deleted.

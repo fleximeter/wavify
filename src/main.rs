@@ -109,32 +109,27 @@ struct Args {
 /// Validates the command line arguments
 fn validate_args(args: Vec<String>) -> Option<Args> {
     if args.len() <= 6 {
-        let valid_args = std::collections::HashMap::from([("-f", 1), ("--folder", 1), ("-n", 1), ("--num-threads", 1), ("-d", 1), ("--delete", 1)]);
         let mut processed_args: Args = Args{folder: String::from("."), num_threads: 0, delete: false};
         let mut i = 1;
         while i < args.len() {
-            if !valid_args.contains_key(args[i].as_str()) {
-                return None;
-            } else {
-                match args[i].as_str() {
-                    "-f" | "--folder" => {
-                        processed_args.folder = args[i+1].clone();
-                        i += 2;
-                    },
-                    "-n" | "--num-threads" => {
-                        processed_args.num_threads = match args[i+1].parse::<usize>() {
-                            Ok(x) => x,
-                            Err(_) => return None
-                        };
-                        i += 2;
-                    },
-                    "-d" | "--delete" => {
-                        processed_args.delete = true;
-                        i += 1;
-                    }
-                    _ => {
-                        return None;
-                    }
+            match args[i].as_str() {
+                "-f" | "--folder" => {
+                    processed_args.folder = args[i+1].clone();
+                    i += 2;
+                },
+                "-t" | "--num-threads" => {
+                    processed_args.num_threads = match args[i+1].parse::<usize>() {
+                        Ok(x) => x,
+                        Err(_) => return None
+                    };
+                    i += 2;
+                },
+                "-d" | "--delete" => {
+                    processed_args.delete = true;
+                    i += 1;
+                }
+                _ => {
+                    return None;
                 }
             }
         }
@@ -150,7 +145,7 @@ fn main() {
     let args = match validate_args(std::env::args().collect()) {
         Some(x) => x,
         None => {
-            println!("Usage:\n-f folder_name -n num_threads\nOptional: include the -d flag to delete the original files when done.");
+            println!("Usage:\n-f folder_name -t num_threads\nOptional: include the -d flag to delete the original files when done.");
             return;
         }
     };
