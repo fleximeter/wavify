@@ -109,12 +109,23 @@ struct Args {
 /// Validates the command line arguments
 fn validate_args(args: Vec<String>) -> Option<Args> {
     if args.len() <= 6 {
-        let mut processed_args: Args = Args{folder: String::from("."), num_threads: 0, delete: false};
+        let current_dir = match std::env::current_dir() {
+            Ok(dir) => {
+                match dir.to_str() {
+                    Some(val) => val.to_string(),
+                    None => String::from(".")
+                }
+            },
+            Err(_) => String::from(".")
+        };
+        let mut processed_args: Args = Args{folder: current_dir, num_threads: 0, delete: false};
         let mut i = 1;
         while i < args.len() {
-            match args[i].as_str() {
+            match args[i].as_str().trim() {
                 "-f" | "--folder" => {
-                    processed_args.folder = args[i+1].clone();
+                    if args[i+1] != "." {
+                        processed_args.folder = args[i+1].clone();
+                    }
                     i += 2;
                 },
                 "-t" | "--num-threads" => {
